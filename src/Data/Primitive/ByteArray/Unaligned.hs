@@ -12,7 +12,6 @@ module Data.Primitive.ByteArray.Unaligned
 
 import Control.Monad.Primitive (PrimMonad,PrimState)
 import Control.Monad.Primitive (primitive,primitive_)
-import Data.Primitive (Prim)
 import Data.Primitive.ByteArray (MutableByteArray(..))
 import Data.Primitive.ByteArray (ByteArray(..))
 import Data.Word (Word8,Word64)

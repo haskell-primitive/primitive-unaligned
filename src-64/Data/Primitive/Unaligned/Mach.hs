@@ -48,7 +48,7 @@ writeUnalignedWord64Array# ::
     -> State# s
     -> State# s
 writeUnalignedWord64Array# a i (W64# w) =
-  E.writeWord8ArrayAsWord64# a i w
+  E.writeWord8ArrayAsWord# a i w
 
 writeUnalignedInt64Array# ::
        MutableByteArray# s
@@ -57,4 +57,4 @@ writeUnalignedInt64Array# ::
     -> State# s
     -> State# s
 writeUnalignedInt64Array# a i (I64# w) =
-  E.writeWord8ArrayAsInt64# a i w
+  E.writeWord8ArrayAsInt# a i w
