@@ -4,7 +4,7 @@
 #
 # For more information, see https://github.com/haskell-CI/haskell-ci
 #
-# version: 0.3
+# version: 0.2.1
 #
 language: c
 dist: xenial
@@ -39,7 +39,9 @@ matrix:
       env: GHCHEAD=true
       addons: {apt: {packages: [ghc-ppa-tools,cabal-install-head,ghc-head], sources: [hvr-ghc]}}
 
- before_install:
+  allow_failures:
+
+before_install:
   - HC=/opt/ghc/bin/${CC}
   - HCPKG=${HC/ghc/ghc-pkg}
   - unset CC
@@ -53,19 +55,23 @@ matrix:
 install:
   - ${CABAL} --version
   - echo "$(${HC} --version) [$(${HC} --print-project-git-commit-id 2> /dev/null || echo '?')]"
-  - TEST=--enable-tests
-  - BENCH=--enable-benchmarks
+  - TEST=${TEST---disable-tests}
+  - BENCH=--disable-benchmarks
   - GHCHEAD=${GHCHEAD-false}
   - travis_retry ${CABAL} update -v
   - sed -i.bak 's/^jobs:/-- jobs:/' $CABALHOME/config
   - rm -fv cabal.project cabal.project.local
+  - |
+    if $GHCHEAD; then
+      sed -i.bak 's/-- allow-newer:.*/allow-newer: *:base, *:template-haskell, *:ghc, *:Cabal/' $CABALHOME/config
+    fi
   - grep -Ev -- '^\s*--' $CABALHOME/config | grep -Ev '^\s*$'
   - rm -f cabal.project
   - touch cabal.project
   - "printf 'packages: \".\"\\n' >> cabal.project"
   - "printf 'write-ghc-environment-files: always\\n' >> cabal.project"
   - touch cabal.project.local
-  - "for pkg in $($HCPKG list --simple-output); do echo $pkg | sed 's/-[^-]*$//' | grep -vE -- '^(primitive-unaligned)$' | sed 's/^/constraints: /' | sed 's/$/ installed/' >> cabal.project.local; done"
+  - "for pkg in $($HCPKG list --simple-output); do echo $pkg | sed 's/-[^-]*$//' | grep -vE -- '^(semirings)$' | sed 's/^/constraints: /' | sed 's/$/ installed/' >> cabal.project.local; done"
   - cat cabal.project || true
   - cat cabal.project.local || true
   - if [ -f "./configure.ac" ]; then (cd "." && autoreconf -i); fi
@@ -88,10 +94,10 @@ script:
   - find . -maxdepth 1 -name '*.tar.gz' -exec tar -xvf '{}' \;
   - rm -f cabal.project
   - touch cabal.project
-  - "printf 'packages: \"primitive-unaligned-*/*.cabal\"\\n' >> cabal.project"
+  - "printf 'packages: \"semirings-*/*.cabal\"\\n' >> cabal.project"
   - "printf 'write-ghc-environment-files: always\\n' >> cabal.project"
   - touch cabal.project.local
-  - "for pkg in $($HCPKG list --simple-output); do echo $pkg | sed 's/-[^-]*$//' | grep -vE -- '^(primitive-unaligned)$' | sed 's/^/constraints: /' | sed 's/$/ installed/' >> cabal.project.local; done"
+  - "for pkg in $($HCPKG list --simple-output); do echo $pkg | sed 's/-[^-]*$//' | grep -vE -- '^(semirings)$' | sed 's/^/constraints: /' | sed 's/$/ installed/' >> cabal.project.local; done"
   - cat cabal.project || true
   - cat cabal.project.local || true
   # this builds all libraries and executables (without tests/benchmarks)
@@ -99,16 +105,19 @@ script:
 
   # build & run tests, build benchmarks
   - ${CABAL} new-build -w ${HC} ${TEST} ${BENCH} all
-  - ${CABAL} new-test -w ${HC} ${TEST} ${BENCH} all
+  - if [ "x$TEST" = "x--enable-tests" ]; then ${CABAL} new-test -w ${HC} ${TEST} ${BENCH} all; fi
 
   # cabal check
-  - (cd primitive-unaligned-* && ${CABAL} check)
+  - (cd semirings-* && ${CABAL} check)
 
   # haddock
   - ${CABAL} new-haddock -w ${HC} ${TEST} ${BENCH} all
 
   # Build without installed constraints for packages in global-db
-  - rm -f cabal.project.local; ${CABAL} new-build -w ${HC} --disable-tests --disable-benchmarks all
+  - rm -f cabal.project.local; ${CABAL} new-build -w ${HC} --disable-tests --disable-benchmarks all;
 
-# REGENDATA ["primitive-unaligned.cabal","--output",".travis.yml"]
+  # Constraint sets
+  - rm -rf cabal.project.local
+
+# REGENDATA ["--config","cabal.haskell-ci","--output",".travis.yml","semirings.cabal"]
 # EOF
