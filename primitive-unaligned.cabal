@@ -24,7 +24,7 @@ library
   hs-source-dirs: src
   if arch(x86_64)
     hs-source-dirs: src-64
-  if arch(i386) || arch(i686)
+  if arch(i386) -- || arch(i686) -- we want this here, but cabal seems to not understand what i686 means
     hs-source-dirs: src-32
   ghc-options: -Wall -O2
   default-language: Haskell2010
