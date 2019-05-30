@@ -7,7 +7,7 @@ bug-reports: https://github.com/haskell-primitive/primitive-unaligned/issues
 license: BSD-3-Clause
 license-file: LICENSE
 author: Andrew Martin
-maintainer: andrew.thaddeus@gmail.com
+maintainer: Andrew Martin <andrew.thaddeus@gmail.com>
 copyright: 2019 Andrew Martin
 category: Data
 tested-with: GHC == 8.6.4
