@@ -71,7 +71,7 @@ install:
   - "printf 'packages: \".\"\\n' >> cabal.project"
   - "printf 'write-ghc-environment-files: always\\n' >> cabal.project"
   - touch cabal.project.local
-  - "for pkg in $($HCPKG list --simple-output); do echo $pkg | sed 's/-[^-]*$//' | grep -vE -- '^(semirings)$' | sed 's/^/constraints: /' | sed 's/$/ installed/' >> cabal.project.local; done"
+  - "for pkg in $($HCPKG list --simple-output); do echo $pkg | sed 's/-[^-]*$//' | grep -vE -- '^(primitive-unaligned)$' | sed 's/^/constraints: /' | sed 's/$/ installed/' >> cabal.project.local; done"
   - cat cabal.project || true
   - cat cabal.project.local || true
   - if [ -f "./configure.ac" ]; then (cd "." && autoreconf -i); fi
@@ -94,10 +94,10 @@ script:
   - find . -maxdepth 1 -name '*.tar.gz' -exec tar -xvf '{}' \;
   - rm -f cabal.project
   - touch cabal.project
-  - "printf 'packages: \"semirings-*/*.cabal\"\\n' >> cabal.project"
+  - "printf 'packages: \"primitive-unaligned-*/*.cabal\"\\n' >> cabal.project"
   - "printf 'write-ghc-environment-files: always\\n' >> cabal.project"
   - touch cabal.project.local
-  - "for pkg in $($HCPKG list --simple-output); do echo $pkg | sed 's/-[^-]*$//' | grep -vE -- '^(semirings)$' | sed 's/^/constraints: /' | sed 's/$/ installed/' >> cabal.project.local; done"
+  - "for pkg in $($HCPKG list --simple-output); do echo $pkg | sed 's/-[^-]*$//' | grep -vE -- '^(primitive-unaligned)$' | sed 's/^/constraints: /' | sed 's/$/ installed/' >> cabal.project.local; done"
   - cat cabal.project || true
   - cat cabal.project.local || true
   # this builds all libraries and executables (without tests/benchmarks)
@@ -108,7 +108,7 @@ script:
   - if [ "x$TEST" = "x--enable-tests" ]; then ${CABAL} new-test -w ${HC} ${TEST} ${BENCH} all; fi
 
   # cabal check
-  - (cd semirings-* && ${CABAL} check)
+  - (cd primitive-unaligned-* && ${CABAL} check)
 
   # haddock
   - ${CABAL} new-haddock -w ${HC} ${TEST} ${BENCH} all
@@ -119,5 +119,5 @@ script:
   # Constraint sets
   - rm -rf cabal.project.local
 
-# REGENDATA ["--config","cabal.haskell-ci","--output",".travis.yml","semirings.cabal"]
+# REGENDATA ["--config","cabal.haskell-ci","--output",".travis.yml","primitive-unaligned.cabal"]
 # EOF
