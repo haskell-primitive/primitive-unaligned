@@ -1,5 +1,10 @@
 {-# language MagicHash #-}
 {-# language UnboxedTuples #-}
+{-# language DerivingStrategies #-}
+{-# language StandaloneDeriving #-}
+{-# language GeneralizedNewtypeDeriving #-}
+{-# language PolyKinds #-}
+{-# language DataKinds #-}
 
 module Data.Primitive.ByteArray.Unaligned
   ( -- * Class
@@ -16,6 +21,8 @@ import Data.Primitive.ByteArray (MutableByteArray(..))
 import Data.Primitive.ByteArray (ByteArray(..))
 import Data.Word (Word8,Word64)
 import Data.Int (Int8,Int64)
+import Foreign.C.Types (CInt(..),CUInt(..),CShort(..))
+import System.Posix.Types (Fd(..))
 import GHC.Int (Int16(I16#),Int32(I32#),Int(I#))
 import GHC.Word (Word16(W16#),Word32(W32#),Word(W#))
 import GHC.Exts (Int#,State#,MutableByteArray#,ByteArray#)
@@ -139,6 +146,11 @@ instance PrimUnaligned Int64 where
   indexUnalignedByteArray# = M.indexUnalignedInt64Array#
   readUnalignedByteArray# = M.readUnalignedInt64Array#
   writeUnalignedByteArray# = M.writeUnalignedInt64Array#
+
+deriving newtype instance PrimUnaligned CInt
+deriving newtype instance PrimUnaligned CUInt
+deriving newtype instance PrimUnaligned CShort
+deriving newtype instance PrimUnaligned Fd
 
 -- | Read a primitive value from the byte array.
 -- The offset is given in bytes rather than in elements
