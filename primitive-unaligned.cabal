@@ -1,6 +1,6 @@
 cabal-version: 2.2
 name: primitive-unaligned
-version: 0.1.0.0
+version: 0.1.1.0
 synopsis: Unaligned access to primitive arrays
 description: Unaligned access to primitive arrays. The offsets are given in bytes rather than elements.
 homepage: https://github.com/haskell-primitive/primitive-unaligned
