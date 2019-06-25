@@ -21,11 +21,12 @@ import Data.Primitive.ByteArray (MutableByteArray(..))
 import Data.Primitive.ByteArray (ByteArray(..))
 import Data.Word (Word8,Word64)
 import Data.Int (Int8,Int64)
-import Foreign.C.Types (CInt(..),CUInt(..),CShort(..))
-import System.Posix.Types (Fd(..))
 import GHC.Int (Int16(I16#),Int32(I32#),Int(I#))
 import GHC.Word (Word16(W16#),Word32(W32#),Word(W#))
 import GHC.Exts (Int#,State#,MutableByteArray#,ByteArray#)
+import GHC.Exts (Char(C#),Double(D#),Float(F#),Ptr(Ptr))
+import qualified Foreign.C.Types as C
+import qualified System.Posix.Types as P
 import qualified Data.Primitive.Unaligned.Mach as M
 import qualified Data.Primitive as PM
 import qualified GHC.Exts as E
@@ -147,10 +148,75 @@ instance PrimUnaligned Int64 where
   readUnalignedByteArray# = M.readUnalignedInt64Array#
   writeUnalignedByteArray# = M.writeUnalignedInt64Array#
 
-deriving newtype instance PrimUnaligned CInt
-deriving newtype instance PrimUnaligned CUInt
-deriving newtype instance PrimUnaligned CShort
-deriving newtype instance PrimUnaligned Fd
+instance PrimUnaligned Char where
+  {-# inline indexUnalignedByteArray# #-}
+  {-# inline readUnalignedByteArray# #-}
+  {-# inline writeUnalignedByteArray# #-}
+  indexUnalignedByteArray# a i =
+    C# (E.indexWord8ArrayAsWideChar# a i)
+  readUnalignedByteArray# a i s0 =
+    case E.readWord8ArrayAsWideChar# a i s0 of
+      (# s1, r #) -> (# s1, C# r #)
+  writeUnalignedByteArray# a i (C# w) =
+    E.writeWord8ArrayAsWideChar# a i w
+
+instance PrimUnaligned Double where
+  {-# inline indexUnalignedByteArray# #-}
+  {-# inline readUnalignedByteArray# #-}
+  {-# inline writeUnalignedByteArray# #-}
+  indexUnalignedByteArray# a i =
+    D# (E.indexWord8ArrayAsDouble# a i)
+  readUnalignedByteArray# a i s0 =
+    case E.readWord8ArrayAsDouble# a i s0 of
+      (# s1, r #) -> (# s1, D# r #)
+  writeUnalignedByteArray# a i (D# w) =
+    E.writeWord8ArrayAsDouble# a i w
+
+instance PrimUnaligned Float where
+  {-# inline indexUnalignedByteArray# #-}
+  {-# inline readUnalignedByteArray# #-}
+  {-# inline writeUnalignedByteArray# #-}
+  indexUnalignedByteArray# a i =
+    F# (E.indexWord8ArrayAsFloat# a i)
+  readUnalignedByteArray# a i s0 =
+    case E.readWord8ArrayAsFloat# a i s0 of
+      (# s1, r #) -> (# s1, F# r #)
+  writeUnalignedByteArray# a i (F# w) =
+    E.writeWord8ArrayAsFloat# a i w
+
+instance PrimUnaligned (Ptr a) where
+  {-# inline indexUnalignedByteArray# #-}
+  {-# inline readUnalignedByteArray# #-}
+  {-# inline writeUnalignedByteArray# #-}
+  indexUnalignedByteArray# a i =
+    Ptr (E.indexWord8ArrayAsAddr# a i)
+  readUnalignedByteArray# a i s0 =
+    case E.readWord8ArrayAsAddr# a i s0 of
+      (# s1, r #) -> (# s1, Ptr r #)
+  writeUnalignedByteArray# a i (Ptr w) =
+    E.writeWord8ArrayAsAddr# a i w
+
+deriving newtype instance PrimUnaligned P.CCc
+deriving newtype instance PrimUnaligned C.CChar
+deriving newtype instance PrimUnaligned P.CDev
+deriving newtype instance PrimUnaligned C.CDouble
+deriving newtype instance PrimUnaligned P.CGid
+deriving newtype instance PrimUnaligned P.CIno
+deriving newtype instance PrimUnaligned C.CInt
+deriving newtype instance PrimUnaligned C.CLLong
+deriving newtype instance PrimUnaligned C.CLong
+deriving newtype instance PrimUnaligned P.CMode
+deriving newtype instance PrimUnaligned P.CNlink
+deriving newtype instance PrimUnaligned P.COff
+deriving newtype instance PrimUnaligned P.CPid
+deriving newtype instance PrimUnaligned C.CSChar
+deriving newtype instance PrimUnaligned P.CSsize
+deriving newtype instance PrimUnaligned C.CShort
+deriving newtype instance PrimUnaligned C.CUInt
+deriving newtype instance PrimUnaligned C.CULLong
+deriving newtype instance PrimUnaligned C.CULong
+deriving newtype instance PrimUnaligned P.CUid
+deriving newtype instance PrimUnaligned P.Fd
 
 -- | Read a primitive value from the byte array.
 -- The offset is given in bytes rather than in elements
