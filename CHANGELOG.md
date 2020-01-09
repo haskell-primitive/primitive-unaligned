@@ -1,5 +1,11 @@
 # Revision history for primitive-unaligned
 
-## 0.1.0.0 -- YYYY-mm-dd
+## 0.1.1.1 -- 2020-01-09
 
-* First version. Released on an unsuspecting world.
+* Only derive `PrimUnaligned` instances for `cc`, `gid`, `nlink`, and `uid`
+  on platforms where these types exist. Prior to this change, Windows users
+  were unable to build this library.
+
+## 0.1.1.0 -- 2019-06-25
+
+* First release
