@@ -5,6 +5,7 @@
 {-# language GeneralizedNewtypeDeriving #-}
 {-# language PolyKinds #-}
 {-# language DataKinds #-}
+{-# language CPP #-}
 
 module Data.Primitive.ByteArray.Unaligned
   ( -- * Class
@@ -36,14 +37,14 @@ import qualified GHC.Exts as E
 -- of the typeclass methods are interpreted as bytes,
 -- not elements.
 class PrimUnaligned a where
-  indexUnalignedByteArray# :: 
+  indexUnalignedByteArray# ::
     ByteArray# -> Int# -> a
-  readUnalignedByteArray# :: 
+  readUnalignedByteArray# ::
        MutableByteArray# s
     -> Int#
     -> State# s
     -> (# State# s, a #)
-  writeUnalignedByteArray# :: 
+  writeUnalignedByteArray# ::
        MutableByteArray# s
     -> Int#
     -> a
@@ -196,17 +197,27 @@ instance PrimUnaligned (Ptr a) where
   writeUnalignedByteArray# a i (Ptr w) =
     E.writeWord8ArrayAsAddr# a i w
 
+#if defined(HTYPE_CC_T)
 deriving newtype instance PrimUnaligned P.CCc
+#endif
+#if defined(HTYPE_GID_T)
+deriving newtype instance PrimUnaligned P.CGid
+#endif
+#if defined(HTYPE_NLINK_T)
+deriving newtype instance PrimUnaligned P.CNlink
+#endif
+#if defined(HTYPE_UID_T)
+deriving newtype instance PrimUnaligned P.CUid
+#endif
+
 deriving newtype instance PrimUnaligned C.CChar
 deriving newtype instance PrimUnaligned P.CDev
 deriving newtype instance PrimUnaligned C.CDouble
-deriving newtype instance PrimUnaligned P.CGid
 deriving newtype instance PrimUnaligned P.CIno
 deriving newtype instance PrimUnaligned C.CInt
 deriving newtype instance PrimUnaligned C.CLLong
 deriving newtype instance PrimUnaligned C.CLong
 deriving newtype instance PrimUnaligned P.CMode
-deriving newtype instance PrimUnaligned P.CNlink
 deriving newtype instance PrimUnaligned P.COff
 deriving newtype instance PrimUnaligned P.CPid
 deriving newtype instance PrimUnaligned C.CSChar
@@ -215,7 +226,6 @@ deriving newtype instance PrimUnaligned C.CShort
 deriving newtype instance PrimUnaligned C.CUInt
 deriving newtype instance PrimUnaligned C.CULLong
 deriving newtype instance PrimUnaligned C.CULong
-deriving newtype instance PrimUnaligned P.CUid
 deriving newtype instance PrimUnaligned P.Fd
 
 -- | Read a primitive value from the byte array.
