@@ -1,3 +1,4 @@
+{-# language CPP #-}
 {-# language MagicHash #-}
 {-# language UnboxedTuples #-}
 
@@ -17,11 +18,19 @@ import qualified GHC.Exts as E
 
 indexUnalignedWord64Array# :: ByteArray# -> Int# -> Word64
 indexUnalignedWord64Array# a i =
-  W64# (E.indexWord8ArrayAsWord# a i)
+  W64# (
+#if MIN_VERSION_base(4,17,0)
+    E.wordToWord64#
+#endif
+    (E.indexWord8ArrayAsWord# a i))
 
 indexUnalignedInt64Array# :: ByteArray# -> Int# -> Int64
 indexUnalignedInt64Array# a i =
-  I64# (E.indexWord8ArrayAsInt# a i)
+  I64# (
+#if MIN_VERSION_base(4,17,0)
+    E.intToInt64#
+#endif
+    (E.indexWord8ArrayAsInt# a i))
 
 readUnalignedWord64Array# ::
      MutableByteArray# s
@@ -30,7 +39,12 @@ readUnalignedWord64Array# ::
   -> (# State# s, Word64 #)
 readUnalignedWord64Array# a i s0 =
   case E.readWord8ArrayAsWord# a i s0 of
-    (# s1, r #) -> (# s1, W64# r #)
+    (# s1, r #) -> (# s1, W64# (
+#if MIN_VERSION_base(4,17,0)
+        E.wordToWord64#
+#endif
+        r)
+        #)
 
 readUnalignedInt64Array# ::
      MutableByteArray# s
@@ -39,7 +53,11 @@ readUnalignedInt64Array# ::
   -> (# State# s, Int64 #)
 readUnalignedInt64Array# a i s0 =
   case E.readWord8ArrayAsInt# a i s0 of
-    (# s1, r #) -> (# s1, I64# r #)
+    (# s1, r #) -> (# s1, I64# (
+#if MIN_VERSION_base(4,17,0)
+       E.intToInt64#
+#endif
+        r) #)
 
 writeUnalignedWord64Array# ::
        MutableByteArray# s
@@ -48,7 +66,11 @@ writeUnalignedWord64Array# ::
     -> State# s
     -> State# s
 writeUnalignedWord64Array# a i (W64# w) =
-  E.writeWord8ArrayAsWord# a i w
+  E.writeWord8ArrayAsWord# a i (
+#if MIN_VERSION_base(4,17,0)
+    E.word64ToWord#
+#endif
+    w)
 
 writeUnalignedInt64Array# ::
        MutableByteArray# s
@@ -57,4 +79,8 @@ writeUnalignedInt64Array# ::
     -> State# s
     -> State# s
 writeUnalignedInt64Array# a i (I64# w) =
-  E.writeWord8ArrayAsInt# a i w
+  E.writeWord8ArrayAsInt# a i (
+#if MIN_VERSION_base(4,17,0)
+    E.int64ToInt#
+#endif
+    w)
